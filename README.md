@@ -22,7 +22,10 @@ Cumulativas, e com lacunas: só as etapas que **têm** parte Quarkus ganham bran
 | `aula10` | 10 — item 7 | Tracking com o driver nativo do Cassandra (`CqlSession`) |
 | `aula11` | 11 — item 7 | Recomendação com o driver nativo do Neo4J |
 
-`main` aponta para o estado final.
+`main` aponta para o estado final, com os quatro serviços.
+
+Cada branch traz o gabarito escrito em `docs/aulaNN.md`, com as medições reais e a comparação com a
+versão Spring.
 
 ## Os serviços
 
@@ -35,6 +38,19 @@ Cumulativas, e com lacunas: só as etapas que **têm** parte Quarkus ganham bran
 
 **Quarkus 3.39.0** sobre **Java 25**. Cada serviço é um projeto Maven independente, com o próprio
 `mvnw`.
+
+## O que estas etapas mediram
+
+| | Spring | Quarkus |
+|---|---|---|
+| Startup do administrativo (jar) | 2,489 s | **1,292 s** |
+| Startup do tracking (jar) | 1,194 s | **0,440 s** |
+| Startup das recomendações (jar) | 1,211 s | **0,402 s** |
+| Ingestão no Cassandra (concorrência 128) | 17.266 pontos/s | **21.990 pontos/s** |
+
+E dois achados que não estavam no roteiro: o `@Find` do Jakarta Data pega erro de **tipo** em tempo
+de compilação, e a extensão Jakarta NoSQL para MongoDB tem seis vazamentos — um deles um `update()`
+que responde HTTP 200 e não grava. Os detalhes estão em `docs/`.
 
 ## Subindo
 
