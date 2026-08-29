@@ -48,7 +48,7 @@ versão Spring.
 | Startup das recomendações (jar) | 1,211 s | **0,402 s** |
 | Ingestão no Cassandra (concorrência 128) | 17.266 pontos/s | **21.990 pontos/s** |
 
-E dois achados que não estavam no roteiro: o `@Find` do Jakarta Data pega erro de **tipo** em tempo
+E dois coisas importantes: o `@Find` do Jakarta Data pega erro de **tipo** em tempo
 de compilação, e a extensão Jakarta NoSQL para MongoDB tem seis vazamentos — um deles um `update()`
 que responde HTTP 200 e não grava. Os detalhes estão em `docs/`.
 
