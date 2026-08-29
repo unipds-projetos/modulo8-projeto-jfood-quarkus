@@ -1,0 +1,186 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-0000-4000-b000-000000000010",
+    "name": "JFood Quarkus — Administrativo",
+    "description": "Etapa 3 Parte 2: Quarkus + Jakarta Data (porta 8080). Suba a infra e carregue sql/aula03/ antes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Aula 3 Parte 2 — Jakarta Data",
+      "item": [
+        {
+          "name": "Historico do cliente (join fetch)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/clientes/{{clienteId}}/pedidos",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clientes",
+                "{{clienteId}}",
+                "pedidos"
+              ]
+            },
+            "description": "Medido: 1 query. O mesmo endpoint na Parte 1 custava 6 sem JOIN FETCH."
+          },
+          "response": []
+        },
+        {
+          "name": "Resumo do historico (projecao por record)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/clientes/{{clienteId}}/pedidos/resumo",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clientes",
+                "{{clienteId}}",
+                "pedidos",
+                "resumo"
+              ]
+            },
+            "description": "select new totalmente qualificado. Errar o construtor quebra o BUILD -- a projecao por interface da Parte 1 falharia em silencio."
+          },
+          "response": []
+        },
+        {
+          "name": "Pedidos por status (SEM fetch)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/pedidos?status=ENTREGUE",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ENTREGUE"
+                }
+              ]
+            },
+            "description": "Medido: 9 queries para 16 pedidos. O N+1 nao desaparece na StatelessSession -- ele fica @ManyToOne a @ManyToOne."
+          },
+          "response": []
+        },
+        {
+          "name": "Itens do pedido (left join fetch)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/pedidos/1/itens",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "1",
+                "itens"
+              ]
+            },
+            "description": "1 query. O `left` e obrigatorio: sem ele, pedido sem entregador sumiria."
+          },
+          "response": []
+        },
+        {
+          "name": "Itens do pedido SEM fetch (falha)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/pedidos/1/itens-sem-fetch",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "1",
+                "itens-sem-fetch"
+              ]
+            },
+            "description": "LazyInitializationException: nao ha sessao para carregar a colecao. Aqui o N+1 da Parte 1 vira FALHA."
+          },
+          "response": []
+        },
+        {
+          "name": "Renomear SEM salvar (dirty checking nao existe)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/restaurantes/1/renomear-sem-salvar?nome=NOME QUE NAO VAI PERSISTIR",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "restaurantes",
+                "1",
+                "renomear-sem-salvar"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "NOME QUE NAO VAI PERSISTIR"
+                }
+              ]
+            },
+            "description": "Responde 200 e o banco NAO muda. Confira: SELECT nome FROM restaurante WHERE id=1."
+          },
+          "response": []
+        },
+        {
+          "name": "Renomear com save() explicito",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{administrativo}}/api/v1/restaurantes/1/renomear?nome=Pizzaria Bella Napoli II",
+              "host": [
+                "{{administrativo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "restaurantes",
+                "1",
+                "renomear"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "Pizzaria Bella Napoli II"
+                }
+              ]
+            },
+            "description": "Com a StatelessSession, gravar e uma chamada explicita."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
