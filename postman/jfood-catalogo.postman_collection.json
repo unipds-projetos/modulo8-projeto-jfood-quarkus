@@ -122,6 +122,90 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Aula 9 item 8 — Cache do Quarkus",
+      "item": [
+        {
+          "name": "Busca cacheada (@CacheResult)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/busca-cacheada?termo=pizza",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "busca-cacheada"
+              ],
+              "query": [
+                {
+                  "key": "termo",
+                  "value": "pizza"
+                }
+              ]
+            },
+            "description": "Dispare duas vezes: a linha 'MISS ->' so aparece na primeira. Chave: cache:itens-busca:pizza"
+          },
+          "response": []
+        },
+        {
+          "name": "Detalhe cacheado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/{{itemId}}",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "{{itemId}}"
+              ]
+            },
+            "description": "O lookup por id precisou de filtro nativo: String nao casa com ObjectId na abstracao."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar preco (invalida os dois caches)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/{{itemId}}/preco?valor=99.90",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "{{itemId}}",
+                "preco"
+              ],
+              "query": [
+                {
+                  "key": "valor",
+                  "value": "99.90"
+                }
+              ]
+            },
+            "description": "@CacheInvalidate + @CacheInvalidateAll empilhados. A ESCRITA passa pelo driver nativo: template.update() reporta 200 e nao grava."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

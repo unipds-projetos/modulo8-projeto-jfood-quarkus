@@ -52,6 +52,13 @@
             <version>${quarkus-jnosql.version}</version>
         </dependency>
 
+        <!-- Cache em Redis. No Spring foram DUAS dependencias: starter-cache
+             (o CacheManager) e starter-data-redis (o cliente). Aqui e uma. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-redis-cache</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit</artifactId>

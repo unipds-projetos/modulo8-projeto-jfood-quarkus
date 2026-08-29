@@ -1,8 +1,11 @@
 package br.com.unipds.jfood.catalogo.web;
 
 import br.com.unipds.jfood.catalogo.domain.ItemCardapio;
+import br.com.unipds.jfood.catalogo.domain.ResultadoBusca;
 import br.com.unipds.jfood.catalogo.service.BuscaService;
+import br.com.unipds.jfood.catalogo.service.CardapioCacheService;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -16,9 +19,32 @@ import java.util.Map;
 public class BuscaResource {
 
     private final BuscaService buscaService;
+    private final CardapioCacheService cacheService;
 
-    public BuscaResource(BuscaService buscaService) {
+    public BuscaResource(BuscaService buscaService, CardapioCacheService cacheService) {
         this.buscaService = buscaService;
+        this.cacheService = cacheService;
+    }
+
+    /** A mesma busca, agora com @CacheResult. */
+    @GET
+    @Path("/itens/busca-cacheada")
+    public ResultadoBusca buscaCacheada(@QueryParam("termo") String termo) {
+        return cacheService.busca(termo);
+    }
+
+    @GET
+    @Path("/itens/{id}")
+    public ItemCardapio detalhe(@PathParam("id") String id) {
+        return cacheService.detalhe(id);
+    }
+
+    /** Invalida o detalhe daquele item E todas as buscas. */
+    @PUT
+    @Path("/itens/{id}/preco")
+    public ItemCardapio atualizarPreco(@PathParam("id") String id,
+                                       @QueryParam("valor") java.math.BigDecimal valor) {
+        return cacheService.atualizarPreco(id, valor);
     }
 
     @GET
