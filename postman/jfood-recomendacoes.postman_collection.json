@@ -1,0 +1,125 @@
+{
+  "info": {
+    "_postman_id": "e5f6a7b8-0000-4000-b000-000000000040",
+    "name": "JFood Quarkus — Recomendacoes",
+    "description": "Etapa 11 item 7: driver nativo do Neo4J (porta 8084). Sincronize o grafo antes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Aula 11 item 7 — driver nativo",
+      "item": [
+        {
+          "name": "Recomendacoes por vizinhanca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{recomendacoes}}/api/v1/recomendacoes/clientes/10?notaMinima=4&limite=5",
+              "host": [
+                "{{recomendacoes}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendacoes",
+                "clientes",
+                "10"
+              ],
+              "query": [
+                {
+                  "key": "notaMinima",
+                  "value": "4"
+                },
+                {
+                  "key": "limite",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Cypher identico ao da versao Spring, resultado identico. O que muda e o mapeamento, feito a mao."
+          },
+          "response": []
+        },
+        {
+          "name": "Recomendacoes ponderadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{recomendacoes}}/api/v1/recomendacoes/clientes/10/ponderado",
+              "host": [
+                "{{recomendacoes}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendacoes",
+                "clientes",
+                "10",
+                "ponderado"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Contas vinculadas (fraude)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{recomendacoes}}/api/v1/recomendacoes/fraude/contas-vinculadas",
+              "host": [
+                "{{recomendacoes}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendacoes",
+                "fraude",
+                "contas-vinculadas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Caminho mais curto (profundidade variavel)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{recomendacoes}}/api/v1/recomendacoes/caminho?de=10&para=19&maxSaltos=6",
+              "host": [
+                "{{recomendacoes}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recomendacoes",
+                "caminho"
+              ],
+              "query": [
+                {
+                  "key": "de",
+                  "value": "10"
+                },
+                {
+                  "key": "para",
+                  "value": "19"
+                },
+                {
+                  "key": "maxSaltos",
+                  "value": "6"
+                }
+              ]
+            },
+            "description": "shortestPath com *..6. Trocar a profundidade e trocar o numero; em SQL seria reescrever a consulta."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
