@@ -21,6 +21,8 @@
         <quarkus.platform.version>3.39.0</quarkus.platform.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <!-- Casada com o liquibase-core que o BOM do Quarkus traz -->
+        <liquibase-maven-plugin.version>4.33.0</liquibase-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -73,6 +75,12 @@
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
 
+        <!-- Liquibase: a partir daqui o esquema tem um dono, e nao e o Hibernate -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-liquibase</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit</artifactId>
@@ -119,6 +127,31 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <!--
+              A extensao quarkus-liquibase aplica as migracoes NA SUBIDA e nao
+              expoe rollback  e esta certa: rollback e operacao de plantao, nao
+              de startup. Este plugin existe para os comandos de plantao:
+
+                ./mvnw liquibase:tag -Dliquibase.tag=antes-do-lancamento
+                ./mvnw liquibase:updateSQL          # ve o SQL, sem executar
+                ./mvnw liquibase:rollbackSQL -Dliquibase.rollbackCount=2
+                ./mvnw liquibase:rollback    -Dliquibase.rollbackCount=2
+            -->
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>${liquibase-maven-plugin.version}</version>
+                <configuration>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>42.7.8</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
