@@ -1,0 +1,127 @@
+{
+  "info": {
+    "_postman_id": "c3d4e5f6-0000-4000-b000-000000000020",
+    "name": "JFood Quarkus — Catalogo",
+    "description": "Etapa 8 item 8: busca do cardapio com Jakarta NoSQL (porta 8082).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Aula 8 item 8 — Jakarta NoSQL",
+      "item": [
+        {
+          "name": "Busca por nome (Jakarta NoSQL)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/busca?termo=Pizza",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "busca"
+              ],
+              "query": [
+                {
+                  "key": "termo",
+                  "value": "Pizza"
+                }
+              ]
+            },
+            "description": "like usa curinga SQL, nao regex -- e e SENSIVEL a maiusculas. Troque para 'pizza' e veja voltar vazio."
+          },
+          "response": []
+        },
+        {
+          "name": "Busca ignorando maiusculas (MongoDBTemplate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/busca-ignore-case?termo=pizza",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "busca-ignore-case"
+              ],
+              "query": [
+                {
+                  "key": "termo",
+                  "value": "pizza"
+                }
+              ]
+            },
+            "description": "Um degrau abaixo: filtro Bson nativo, entidade ainda mapeada. E a saida para o IGNORE_CASE que o driver nao implementa."
+          },
+          "response": []
+        },
+        {
+          "name": "Card com subset (driver cru)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/busca-card?termo=pizza",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "busca-card"
+              ],
+              "query": [
+                {
+                  "key": "termo",
+                  "value": "pizza"
+                }
+              ]
+            },
+            "description": "Dois degraus abaixo. O subdocumento do Subset Pattern nao e mapeavel pela extensao: UnsupportedOperationException."
+          },
+          "response": []
+        },
+        {
+          "name": "Itens por tag",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogo}}/api/v1/catalogo/itens/por-tag?tag=vegano",
+              "host": [
+                "{{catalogo}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalogo",
+                "itens",
+                "por-tag"
+              ],
+              "query": [
+                {
+                  "key": "tag",
+                  "value": "vegano"
+                }
+              ]
+            },
+            "description": "Consulta por igualdade: passa pela abstracao sem esforco."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
