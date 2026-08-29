@@ -1,0 +1,115 @@
+# Mesma infraestrutura do modulo8-projeto-jfood-spring: mesmos servicos, mesmas
+# portas, mesmos container_name.
+#
+# ATENCAO: os dois stacks NAO sobem ao mesmo tempo. O container_name e fixo (nao
+# leva o nome do projeto Compose no prefixo), entao o segundo `docker compose up`
+# falha com "container name /jfood-postgres is already in use". A falha e
+# imediata e explicita -- de proposito.
+#
+# Ja os VOLUMES levam o nome do projeto Compose no prefixo, e o nome do projeto e
+# o nome do diretorio. Ou seja: o jfood-db deste repo e um banco DIFERENTE do
+# jfood-db do repo Spring. Por isso a aula03 carrega sql/aula03/ com o DDL e o
+# seed -- e a aula04 os substitui pelo Liquibase.
+
+services:
+
+  # O banco transacional do JFood: usuarios, pedidos e pagamentos
+  postgres:
+    image: postgres:16
+    container_name: jfood-postgres
+    environment:
+      POSTGRES_DB: jfood-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - jfood_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jfood-db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aula 8 — o catalogo de restaurantes e cardapios
+  mongodb:
+    image: mongo:8
+    container_name: jfood-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - jfood_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aula 9 — o cache do cardapio e os contadores de visualizacao
+  redis:
+    image: redis:8-alpine
+    container_name: jfood-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - jfood_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aula 10 — o tracking de entregadores
+  cassandra:
+    image: cassandra:5
+    container_name: jfood-cassandra
+    restart: always
+    ports:
+      - "9042:9042"
+    environment:
+      # Um no so, para a maquina local. Em producao seriam pelo menos tres, com
+      # NetworkTopologyStrategy e replication_factor 3.
+      CASSANDRA_CLUSTER_NAME: jfood-cluster
+      # A JVM do Cassandra pede memoria com folga; sem isto ele tenta reservar
+      # 1/4 da RAM da maquina.
+      MAX_HEAP_SIZE: 1G
+      HEAP_NEWSIZE: 256M
+    volumes:
+      - jfood_cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+  # Aula 11 — a recomendacao por avaliacoes
+  neo4j:
+    image: neo4j:2026-trixie
+    container_name: jfood-neo4j
+    restart: always
+    environment:
+      NEO4J_AUTH: neo4j/neo4jpassword
+    ports:
+      - "7474:7474"     # interface web (Neo4J Browser)
+      - "7687:7687"     # protocolo binario Bolt (aplicacao Java)
+    volumes:
+      - jfood_neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  jfood_postgres_data:
+  jfood_mongo_data:
+  jfood_redis_data:
+  jfood_cassandra_data:
+  jfood_neo4j_data:
