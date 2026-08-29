@@ -1,0 +1,158 @@
+{
+  "info": {
+    "_postman_id": "d4e5f6a7-0000-4000-b000-000000000030",
+    "name": "JFood Quarkus — Tracking",
+    "description": "Etapa 10 item 7: driver nativo do Cassandra (porta 8083). Rode o cql/ antes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Aula 10 item 7 — driver nativo",
+      "item": [
+        {
+          "name": "Enviar ping (202)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{tracking}}/api/v1/tracking/pings",
+              "host": [
+                "{{tracking}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tracking",
+                "pings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entregadorId\": 7,\n  \"entregaId\": 9007,\n  \"latitude\": -23.5613,\n  \"longitude\": -46.6565,\n  \"velocidadeKmh\": 32.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Tres INSERT por statement preparado, com USING TTL de 90 dias."
+          },
+          "response": []
+        },
+        {
+          "name": "Posicao atual",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tracking}}/api/v1/tracking/entregadores/7/posicao",
+              "host": [
+                "{{tracking}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tracking",
+                "entregadores",
+                "7",
+                "posicao"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rota do dia",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tracking}}/api/v1/tracking/entregadores/7/rota?dia=2026-08-29",
+              "host": [
+                "{{tracking}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tracking",
+                "entregadores",
+                "7",
+                "rota"
+              ],
+              "query": [
+                {
+                  "key": "dia",
+                  "value": "2026-08-29"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rota da entrega",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tracking}}/api/v1/tracking/entregas/9007/rota",
+              "host": [
+                "{{tracking}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tracking",
+                "entregas",
+                "9007",
+                "rota"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Teste de carga",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{tracking}}/api/v1/tracking/experimentos/carga?pontos=100000&entregadores=200&concorrencia=128",
+              "host": [
+                "{{tracking}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tracking",
+                "experimentos",
+                "carga"
+              ],
+              "query": [
+                {
+                  "key": "pontos",
+                  "value": "100000"
+                },
+                {
+                  "key": "entregadores",
+                  "value": "200"
+                },
+                {
+                  "key": "concorrencia",
+                  "value": "128"
+                }
+              ]
+            },
+            "description": "Medido: 21.990 pontos/s (65.971 escritas/s) contra 17.266 do Spring Data. Mesmo harness, mesmos parametros."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
