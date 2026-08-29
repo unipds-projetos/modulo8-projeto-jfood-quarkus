@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="4-add-check-valor-pedido" author="jfood" labels="schema">
+        <comment>ONDE A ABSTRACAO TERMINA: o Liquibase nao tem change type para CHECK</comment>
+
+        <!--
+          Aqui esta o limite do formato declarativo, e vale entender por que.
+
+          O Liquibase tem createTable, addColumn, addForeignKeyConstraint,
+          addUniqueConstraint  e NAO tem addCheckConstraint no open source. Uma
+          CHECK e uma expressao arbitraria em SQL, e nao ha vocabulario portavel
+          que a descreva.
+
+          Repare tambem no que o generateChangeLog fez: ele NAO capturou as
+          CHECK ao ler o banco. Um esquema gerado por engenharia reversa vem sem
+          elas  e ninguem e avisado.
+
+          Fora do <sql>, o rollback automatico tambem acaba: e preciso escrever
+          o <rollback> que a abstracao deixou de dar.
+        -->
+        <sql>
+            ALTER TABLE pedido
+                ADD CONSTRAINT ck_pedido_valor_total_nao_negativo CHECK (valor_total >= 0);
+            ALTER TABLE pedido
+                ADD CONSTRAINT ck_pedido_taxa_entrega_nao_negativa CHECK (taxa_entrega >= 0);
+        </sql>
+        <rollback>
+            ALTER TABLE pedido DROP CONSTRAINT ck_pedido_valor_total_nao_negativo;
+            ALTER TABLE pedido DROP CONSTRAINT ck_pedido_taxa_entrega_nao_negativa;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="4-check-status-pedido" author="jfood" labels="schema">
+        <comment>A CHECK do status, que o CREATE TABLE declarativo tambem nao expressa</comment>
+        <sql>
+            ALTER TABLE pedido
+                ADD CONSTRAINT ck_pedido_status CHECK (status IN
+                    ('CRIADO','CONFIRMADO','EM_PREPARO','A_CAMINHO','ENTREGUE','CANCELADO'));
+            ALTER TABLE entregador
+                ADD CONSTRAINT ck_entregador_tipo_veiculo CHECK (tipo_veiculo IN
+                    ('MOTO','BICICLETA','CARRO','A_PE'));
+            ALTER TABLE pagamento
+                ADD CONSTRAINT ck_pagamento_metodo CHECK (metodo IN
+                    ('CARTAO_CREDITO','CARTAO_DEBITO','PIX','DINHEIRO'));
+            ALTER TABLE pagamento
+                ADD CONSTRAINT ck_pagamento_status CHECK (status IN
+                    ('PENDENTE','APROVADO','RECUSADO','ESTORNADO'));
+            ALTER TABLE avaliacao
+                ADD CONSTRAINT ck_avaliacao_nota CHECK (nota BETWEEN 1 AND 5);
+            ALTER TABLE item_pedido
+                ADD CONSTRAINT ck_item_pedido_quantidade CHECK (quantidade > 0);
+            ALTER TABLE item_pedido
+                ADD CONSTRAINT ck_item_pedido_preco CHECK (preco_unitario >= 0);
+            ALTER TABLE item_cardapio
+                ADD CONSTRAINT ck_item_cardapio_preco CHECK (preco >= 0);
+        </sql>
+        <rollback>
+            ALTER TABLE pedido DROP CONSTRAINT ck_pedido_status;
+            ALTER TABLE entregador DROP CONSTRAINT ck_entregador_tipo_veiculo;
+            ALTER TABLE pagamento DROP CONSTRAINT ck_pagamento_metodo;
+            ALTER TABLE pagamento DROP CONSTRAINT ck_pagamento_status;
+            ALTER TABLE avaliacao DROP CONSTRAINT ck_avaliacao_nota;
+            ALTER TABLE item_pedido DROP CONSTRAINT ck_item_pedido_quantidade;
+            ALTER TABLE item_pedido DROP CONSTRAINT ck_item_pedido_preco;
+            ALTER TABLE item_cardapio DROP CONSTRAINT ck_item_cardapio_preco;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

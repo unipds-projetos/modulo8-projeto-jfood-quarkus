@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="5-seed-dados-demo" author="jfood" labels="seed">
+        <comment>Seed grande continua SQL: subquery e setval nao cabem em loadData</comment>
+
+        <!--
+          A regra que separa o loadData do sqlFile nao e o tamanho, e a FORMA.
+
+          O loadData carrega linhas independentes, com valores literais. Este seed
+          resolve FKs por SUBQUERY sobre o nome, insere ids explicitos e chama
+          setval  ele descreve um procedimento, e nao uma tabela de valores.
+        -->
+        <sqlFile path="db/changelog/seed-dados-demo.sql"
+                 relativeToChangelogFile="false"
+                 splitStatements="true"
+                 endDelimiter=";"
+                 stripComments="false"/>
+
+        <rollback>
+            DELETE FROM avaliacao;
+            DELETE FROM pagamento;
+            DELETE FROM item_pedido;
+            DELETE FROM pedido;
+            DELETE FROM item_cardapio;
+            DELETE FROM restaurante;
+            DELETE FROM endereco_entrega;
+            DELETE FROM cliente;
+            DELETE FROM entregador;
+            DELETE FROM dono_restaurante;
+            DELETE FROM usuario;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="8-taxa-entrega-not-null" author="jfood" labels="schema">
+        <comment>Passo 3 de 3: a taxa vira obrigatoria</comment>
+
+        <!-- Declarativo, e com rollback AUTOMATICO: o Liquibase sabe que o
+             inverso de addNotNullConstraint e dropNotNullConstraint. -->
+        <addNotNullConstraint tableName="pedido"
+                              columnName="taxa_entrega"
+                              columnDataType="NUMERIC(10,2)"/>
+    </changeSet>
+
+</databaseChangeLog>

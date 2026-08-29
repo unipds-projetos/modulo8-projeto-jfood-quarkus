@@ -1,7 +1,7 @@
---liquibase formatted sql
+-- Seed grande de demonstracao, carregado por <sqlFile>.
+-- Continua sendo SQL porque e SQL: subqueries para resolver FK por nome,
+-- ids explicitos com setval, INSERT ... SELECT. Nada disso cabe em loadData.
 
---changeset jfood:5-seed-dados-demo labels:seed
---comment: convertido de V5__seed_dados_demo.sql
 -- =============================================================================
 -- V5 — dados de demonstracao
 --
@@ -325,15 +325,3 @@ SELECT p.id, 'DINHEIRO', p.valor_total, 'APROVADO', p.data_pedido + INTERVAL '2 
   FROM pedido p WHERE p.id IN (21, 22);
 
 SELECT setval('pedido_id_seq', (SELECT MAX(id) FROM pedido));
-
---rollback DELETE FROM avaliacao;
---rollback DELETE FROM pagamento;
---rollback DELETE FROM item_pedido;
---rollback DELETE FROM pedido;
---rollback DELETE FROM item_cardapio;
---rollback DELETE FROM restaurante;
---rollback DELETE FROM endereco_entrega;
---rollback DELETE FROM cliente;
---rollback DELETE FROM entregador;
---rollback DELETE FROM dono_restaurante;
---rollback DELETE FROM usuario;

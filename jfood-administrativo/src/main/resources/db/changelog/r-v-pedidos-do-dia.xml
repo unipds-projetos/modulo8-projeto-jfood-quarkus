@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="r-v-pedidos-do-dia" author="jfood" labels="schema" runOnChange="true">
+        <comment>View do painel operacional, reaplicada sempre que este arquivo muda</comment>
+
+        <!--
+          Existe um <createView> declarativo, e ele NAO e usado aqui de proposito.
+
+          Ele so aceita o SELECT em texto de qualquer jeito  ou seja, o corpo da
+          view nunca e portavel de verdade  e ainda adiciona uma camada entre o
+          que voce escreve e o que roda. Para view, o <sql> e mais honesto.
+
+          runOnChange="true" e o equivalente do prefixo R__ do Flyway. E o
+          CREATE OR REPLACE continua obrigatorio: a reexecucao roda o mesmo SQL.
+        -->
+        <sql>
+            CREATE OR REPLACE VIEW v_pedidos_do_dia AS
+            SELECT p.id                AS pedido_id,
+                   p.status,
+                   p.data_pedido,
+                   p.valor_total,
+                   p.taxa_entrega,
+                   uc.nome             AS cliente,
+                   r.nome              AS restaurante,
+                   ue.nome             AS entregador,
+                   pg.metodo           AS metodo_pagamento
+              FROM pedido p
+             INNER JOIN cliente c      ON c.usuario_id = p.cliente_id
+             INNER JOIN usuario uc     ON uc.id = c.usuario_id
+             INNER JOIN restaurante r  ON r.id = p.restaurante_id
+              LEFT JOIN entregador e   ON e.usuario_id = p.entregador_id
+              LEFT JOIN usuario ue     ON ue.id = e.usuario_id
+              LEFT JOIN pagamento pg   ON pg.pedido_id = p.id
+             WHERE p.data_pedido >= CURRENT_DATE;
+        </sql>
+        <rollback>
+            DROP VIEW IF EXISTS v_pedidos_do_dia;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

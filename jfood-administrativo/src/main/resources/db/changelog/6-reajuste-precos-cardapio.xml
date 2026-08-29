@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="6-reajuste-precos-cardapio" author="jfood" labels="seed">
+        <comment>Fato de negocio que aconteceu depois, e nao correcao do passado</comment>
+        <sql>
+            UPDATE item_cardapio
+               SET preco = ROUND(preco * 1.08, 2)
+             WHERE restaurante_id IN (
+                       SELECT id FROM restaurante WHERE nome IN ('Cantina do Zé', 'Pizzaria Bella Napoli')
+                   );
+        </sql>
+
+        <!--
+          NAO E REVERSIVEL. O inverso aritmetico seria dividir por 1.08, mas o
+          ROUND(x, 2) descartou centavos que nao voltam.
+
+          O rollback vazio declara isso  e tem a MESMA armadilha do
+          "rollback empty" da branch aula04-sql: o Liquibase remove o changeset
+          do historico sem executar nada, e o dado alterado continua no banco.
+          Ver docs/aula04.md.
+        -->
+        <rollback/>
+    </changeSet>
+
+</databaseChangeLog>

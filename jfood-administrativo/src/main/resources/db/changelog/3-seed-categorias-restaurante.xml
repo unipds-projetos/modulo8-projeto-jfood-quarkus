@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="3-seed-categorias-restaurante" author="jfood" labels="seed">
+        <comment>Seed pequeno e estavel vira CSV: da para revisar em diff e editar sem SQL</comment>
+
+        <!-- SEM a coluna id: ela e SERIAL, e listar o id no CSV levaria a
+             sequence a ficar defasada  o mesmo problema que o setval resolveu
+             no seed da versao Spring. -->
+        <loadData tableName="categoria_restaurante"
+                  file="db/changelog/categorias-restaurante.csv"
+                  relativeToChangelogFile="false">
+            <!-- O type declarado nao e opcional: sem ele o Liquibase adivinha a
+                 partir do conteudo, e um CSV de numeros que sao codigos vira
+                 coluna numerica. -->
+            <column name="nome" type="STRING"/>
+        </loadData>
+
+        <!-- loadData NAO tem rollback automatico: o Liquibase nao sabe se as
+             linhas ja existiam antes. Escrever o DELETE e obrigatorio. -->
+        <rollback>
+            <delete tableName="categoria_restaurante">
+                <where>nome IN ('Italiana','Japonesa','Brasileira','Árabe','Vegana')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="7-popula-taxa-entrega" author="jfood" labels="seed">
+        <comment>Passo 2 de 3 da obrigatoriedade da taxa: preenche as linhas antigas</comment>
+        <sql>
+            UPDATE pedido
+               SET taxa_entrega = 0.00
+             WHERE taxa_entrega IS NULL;
+        </sql>
+
+        <!-- Tambem nao e reversivel: depois do UPDATE nao ha como distinguir uma
+             linha que era nula de uma que ja tinha 0.00. -->
+        <rollback/>
+    </changeSet>
+
+</databaseChangeLog>

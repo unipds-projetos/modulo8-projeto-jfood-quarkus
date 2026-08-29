@@ -21,17 +21,17 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <include file="db/changelog/1-schema-inicial.sql"/>
-    <include file="db/changelog/2-add-taxa-entrega-pedido.sql"/>
-    <include file="db/changelog/3-seed-categorias-restaurante.sql"/>
-    <include file="db/changelog/4-add-check-valor-pedido.sql"/>
-    <include file="db/changelog/5-seed-dados-demo.sql"/>
-    <include file="db/changelog/6-reajuste-precos-cardapio.sql"/>
-    <include file="db/changelog/7-popula-taxa-entrega.sql"/>
-    <include file="db/changelog/8-taxa-entrega-not-null.sql"/>
+    <include file="db/changelog/1-schema-inicial.xml"/>
+    <include file="db/changelog/2-add-taxa-entrega-pedido.xml"/>
+    <include file="db/changelog/3-seed-categorias-restaurante.xml"/>
+    <include file="db/changelog/4-add-check-valor-pedido.xml"/>
+    <include file="db/changelog/5-seed-dados-demo.xml"/>
+    <include file="db/changelog/6-reajuste-precos-cardapio.xml"/>
+    <include file="db/changelog/7-popula-taxa-entrega.xml"/>
+    <include file="db/changelog/8-taxa-entrega-not-null.xml"/>
 
     <!-- A repetivel vem por ultimo, como no Flyway: ela referencia tabelas que
          as versionadas criaram. -->
-    <include file="db/changelog/r-v-pedidos-do-dia.sql"/>
+    <include file="db/changelog/r-v-pedidos-do-dia.xml"/>
 
 </databaseChangeLog>

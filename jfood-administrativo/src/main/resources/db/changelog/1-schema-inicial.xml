@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+      UM CHANGESET POR TABELA, e nao um para o esquema inteiro.
+      A granularidade e a do rollback: com doze changesets da para voltar
+      uma tabela; com um so, o rollback e tudo ou nada.
+
+      E o DDL some. Quem escreve o CREATE TABLE agora e o Liquibase, para o
+      banco alvo  a mesma definicao roda em PostgreSQL, MySQL ou Oracle.
+      O preco esta na migracao 4.
+    -->
+
+<changeSet id="1-usuario" author="jfood" labels="schema">
+        <createTable tableName="usuario">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="usuario_pkey" />
+            </column>
+            <column name="nome" type="VARCHAR(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="email" type="VARCHAR(150)">
+                <constraints nullable="false" />
+            </column>
+            <column name="senha_hash" type="VARCHAR(60)">
+                <constraints nullable="false" />
+            </column>
+            <column name="telefone" type="VARCHAR(20)" />
+            <column defaultValueComputed="now()" name="criado_em" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="email" constraintName="usuario_email_key" tableName="usuario" />
+    </changeSet>
+
+<changeSet id="1-cliente" author="jfood" labels="schema">
+        <createTable tableName="cliente">
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="cliente_pkey" />
+            </column>
+            <column name="cpf" type="VARCHAR(11)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="cpf" constraintName="cliente_cpf_key" tableName="cliente" />
+    </changeSet>
+
+<changeSet id="1-entregador" author="jfood" labels="schema">
+        <createTable tableName="entregador">
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="entregador_pkey" />
+            </column>
+            <column name="cnh" type="VARCHAR(11)">
+                <constraints nullable="false" />
+            </column>
+            <column name="tipo_veiculo" type="VARCHAR(20)">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueBoolean="true" name="disponivel" type="BOOLEAN">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="cnh" constraintName="entregador_cnh_key" tableName="entregador" />
+    </changeSet>
+
+<changeSet id="1-dono_restaurante" author="jfood" labels="schema">
+        <createTable tableName="dono_restaurante">
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="dono_restaurante_pkey" />
+            </column>
+            <column name="cnpj" type="VARCHAR(14)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="cnpj" constraintName="dono_restaurante_cnpj_key" tableName="dono_restaurante" />
+    </changeSet>
+
+<changeSet id="1-endereco_entrega" author="jfood" labels="schema">
+        <createTable tableName="endereco_entrega">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="endereco_entrega_pkey" />
+            </column>
+            <column name="cliente_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="apelido" type="VARCHAR(30)">
+                <constraints nullable="false" />
+            </column>
+            <column name="cep" type="VARCHAR(8)">
+                <constraints nullable="false" />
+            </column>
+            <column name="logradouro" type="VARCHAR(150)">
+                <constraints nullable="false" />
+            </column>
+            <column name="numero" type="VARCHAR(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="complemento" type="VARCHAR(60)" />
+            <column name="bairro" type="VARCHAR(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="cidade" type="VARCHAR(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="uf" type="CHAR(2)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="cliente_id, apelido" constraintName="endereco_entrega_cliente_id_apelido_key" tableName="endereco_entrega" />
+    </changeSet>
+
+<changeSet id="1-categoria_restaurante" author="jfood" labels="schema">
+        <createTable tableName="categoria_restaurante">
+            <column autoIncrement="true" name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="categoria_restaurante_pkey" />
+            </column>
+            <column name="nome" type="VARCHAR(50)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="nome" constraintName="categoria_restaurante_nome_key" tableName="categoria_restaurante" />
+    </changeSet>
+
+<changeSet id="1-restaurante" author="jfood" labels="schema">
+        <createTable tableName="restaurante">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="restaurante_pkey" />
+            </column>
+            <column name="nome" type="VARCHAR(120)">
+                <constraints nullable="false" />
+            </column>
+            <column name="categoria_id" type="INTEGER">
+                <constraints nullable="false" />
+            </column>
+            <column name="dono_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="cep" type="VARCHAR(8)">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueComputed="now()" name="criado_em" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+<changeSet id="1-item_cardapio" author="jfood" labels="schema">
+        <createTable tableName="item_cardapio">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="item_cardapio_pkey" />
+            </column>
+            <column name="restaurante_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="nome" type="VARCHAR(120)">
+                <constraints nullable="false" />
+            </column>
+            <column name="descricao" type="VARCHAR(255)" />
+            <column name="preco" type="numeric(10, 2)">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueBoolean="true" name="disponivel" type="BOOLEAN">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+<changeSet id="1-pedido" author="jfood" labels="schema">
+        <createTable tableName="pedido">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pedido_pkey" />
+            </column>
+            <column name="cliente_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="restaurante_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="endereco_entrega_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="entregador_id" type="BIGINT" />
+            <column defaultValue="CRIADO" name="status" type="VARCHAR(20)">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueComputed="now()" name="data_pedido" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueNumeric="0" name="valor_total" type="numeric(10, 2)">
+                <constraints nullable="false" />
+            </column>
+            <column name="observacao" type="VARCHAR(255)" />
+        </createTable>
+    </changeSet>
+
+<changeSet id="1-item_pedido" author="jfood" labels="schema">
+        <createTable tableName="item_pedido">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="item_pedido_pkey" />
+            </column>
+            <column name="pedido_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="item_cardapio_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="quantidade" type="INTEGER">
+                <constraints nullable="false" />
+            </column>
+            <column name="preco_unitario" type="numeric(10, 2)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="pedido_id, item_cardapio_id" constraintName="item_pedido_pedido_id_item_cardapio_id_key" tableName="item_pedido" />
+    </changeSet>
+
+<changeSet id="1-pagamento" author="jfood" labels="schema">
+        <createTable tableName="pagamento">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pagamento_pkey" />
+            </column>
+            <column name="pedido_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="metodo" type="VARCHAR(20)">
+                <constraints nullable="false" />
+            </column>
+            <column name="valor" type="numeric(10, 2)">
+                <constraints nullable="false" />
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false" />
+            </column>
+            <column name="pago_em" type="TIMESTAMP WITH TIME ZONE" />
+        </createTable>
+        <addUniqueConstraint columnNames="pedido_id" constraintName="pagamento_pedido_id_key" tableName="pagamento" />
+    </changeSet>
+
+<changeSet id="1-avaliacao" author="jfood" labels="schema">
+        <createTable tableName="avaliacao">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="avaliacao_pkey" />
+            </column>
+            <column name="pedido_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="cliente_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="restaurante_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="nota" type="SMALLINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="comentario" type="VARCHAR(500)" />
+            <column defaultValueComputed="now()" name="criado_em" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="pedido_id" constraintName="avaliacao_pedido_id_key" tableName="avaliacao" />
+    </changeSet>
+
+    <!-- As FKs no fim, como no SQL: assim a ordem dos CREATE nao importa -->
+<changeSet id="1-foreign-keys" author="jfood" labels="schema">
+        <addForeignKeyConstraint baseColumnNames="cliente_id" baseTableName="avaliacao" constraintName="fk_avaliacao_cliente" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="usuario_id" referencedTableName="cliente" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="pedido_id" baseTableName="avaliacao" constraintName="fk_avaliacao_pedido" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="pedido" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="restaurante_id" baseTableName="avaliacao" constraintName="fk_avaliacao_restaurante" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="restaurante" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="cliente" constraintName="fk_cliente_usuario" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="dono_restaurante" constraintName="fk_dono_usuario" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="cliente_id" baseTableName="endereco_entrega" constraintName="fk_endereco_cliente" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="usuario_id" referencedTableName="cliente" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="entregador" constraintName="fk_entregador_usuario" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="restaurante_id" baseTableName="item_cardapio" constraintName="fk_item_cardapio_restaurante" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="restaurante" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="item_cardapio_id" baseTableName="item_pedido" constraintName="fk_item_pedido_cardapio" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="item_cardapio" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="pedido_id" baseTableName="item_pedido" constraintName="fk_item_pedido_pedido" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="pedido" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="pedido_id" baseTableName="pagamento" constraintName="fk_pagamento_pedido" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="pedido" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="cliente_id" baseTableName="pedido" constraintName="fk_pedido_cliente" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="usuario_id" referencedTableName="cliente" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="endereco_entrega_id" baseTableName="pedido" constraintName="fk_pedido_endereco" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="endereco_entrega" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="entregador_id" baseTableName="pedido" constraintName="fk_pedido_entregador" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="usuario_id" referencedTableName="entregador" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="restaurante_id" baseTableName="pedido" constraintName="fk_pedido_restaurante" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="restaurante" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="categoria_id" baseTableName="restaurante" constraintName="fk_restaurante_categoria" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="categoria_restaurante" validate="true" />
+        <addForeignKeyConstraint baseColumnNames="dono_id" baseTableName="restaurante" constraintName="fk_restaurante_dono" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="usuario_id" referencedTableName="dono_restaurante" validate="true" />
+    </changeSet>
+
+</databaseChangeLog>
