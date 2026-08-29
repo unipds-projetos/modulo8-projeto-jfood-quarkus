@@ -190,3 +190,143 @@ ela não está aplicada**, enquanto o dado que ela escreveu continua no banco.
 **A regra que fica:** rode `updateSQL` e `rollbackSQL` **sempre**, antes de qualquer coisa. Ler o SQL
 que seria executado é a única forma de descobrir, antes e não depois, que um changeset não desfaz o
 que você acha que desfaz.
+
+---
+
+# A branch `aula04`: Liquibase idiomático
+
+Os mesmos changelogs, agora no formato declarativo.
+
+## 5. O `git diff` que responde a pergunta da etapa
+
+```
+$ git diff aula04-sql aula04 --stat
+
+ db/changeLog.xml                          |  18 +-
+ db/changelog/1-schema-inicial.sql         | 182 ---
+ db/changelog/1-schema-inicial.xml         | 289 +++
+ db/changelog/2-add-taxa-entrega-pedido.sql|  19 --
+ db/changelog/2-add-taxa-entrega-pedido.xml|  17 ++
+ ... (os outros changelogs)
+ db/changelog/categorias-restaurante.csv   |   6 +
+ 20 files changed, 584 insertions(+), 389 deletions(-)
+```
+
+**O que mudou além dos changelogs? Nada.** O `pom.xml` é idêntico, o `application.properties` é
+idêntico, nenhuma linha de Java mudou. A ferramenta é a mesma; muda apenas **como você descreve a
+mudança**.
+
+E o banco resultante é o mesmo, conferido linha a linha:
+
+| | `aula04-sql` | `aula04` |
+|---|---|---|
+| Changesets no histórico | 9 | **22** |
+| usuários / restaurantes / pedidos / itens | 19 / 7 / 22 / 36 | 19 / 7 / 22 / 36 |
+| `CHECK` constraints | 10 | 10 |
+| `taxa_entrega` | `NOT NULL` | `NOT NULL` |
+
+Os 22 changesets contra 9 são a **granularidade de rollback** que o formato declarativo compra: um
+changeset por tabela, e não um para o esquema inteiro. Dá para voltar `avaliacao` sem tocar em
+`usuario`.
+
+## 6. Como o esquema declarativo foi escrito — e o que ele não viu
+
+Não foi digitado à mão. Foi gerado por engenharia reversa do banco já migrado:
+
+```bash
+./mvnw liquibase:generateChangeLog -Dliquibase.outputChangeLogFile=gerado.xml
+```
+
+O resultado: **78 changesets** — 12 `createTable`, 17 `addForeignKeyConstraint`, 9
+`addUniqueConstraint` e 1 `createView`. Depois curados: ids e autor com significado, `labels`,
+um changeset por tabela, as FKs agrupadas no fim.
+
+Duas coisas precisaram ser removidas do gerado, e as duas ensinam algo:
+
+- **`startWith="20"` na PK de `usuario`.** O gerador leu a posição **atual** da sequence e a gravou
+  no changelog. Em um banco novo isso faria os ids começarem em 20 sem motivo. Engenharia reversa
+  captura o **estado**, não a **intenção**.
+- **`taxa_entrega` na tabela `pedido`.** Ela existe no banco de agora, mas pertence à migração 2. O
+  gerador não tem como saber a linha do tempo — ele vê o retrato final.
+
+E uma coisa o gerador **não viu**:
+
+> **Nenhuma das `CHECK` constraints foi capturada.** Um esquema obtido por `generateChangeLog` vem
+> sem elas, e ninguém é avisado. Se você adotar Liquibase em uma base existente por esse caminho e
+> confiar no resultado, perde silenciosamente todas as regras de domínio que o banco garantia.
+
+## 7. Onde a abstração termina
+
+As `CHECK` foram escritas em `<sql>`, com o `<rollback>` explícito — porque não há change type para
+elas no Liquibase open source. Uma `CHECK` é uma expressão arbitrária, e não existe vocabulário
+portável que a descreva.
+
+E é aqui que a conta do formato declarativo aparece:
+
+| Change type | Rollback |
+|---|---|
+| `createTable`, `addColumn`, `addNotNullConstraint`, `addForeignKeyConstraint` | **Automático** |
+| `loadData` | **Você escreve** — o Liquibase não sabe se as linhas já existiam |
+| `<sql>` | **Você escreve** |
+| `<sqlFile>` | **Você escreve** |
+
+Repare em `8-taxa-entrega-not-null`: na branch em SQL o rollback era uma linha escrita à mão; aqui,
+`<addNotNullConstraint>` traz o `dropNotNullConstraint` de graça. Já a `4-add-check-valor-pedido`
+paga o preço integral.
+
+**A regra prática:** quanto mais declarativo o changeset, mais a ferramenta trabalha por você — e o
+inverso também vale. Todo `<sql>` é uma renúncia consciente à portabilidade **e** ao rollback
+automático.
+
+## 8. Cada seed no seu formato
+
+**Categorias de cozinha → CSV + `loadData`.**
+
+```xml
+<loadData tableName="categoria_restaurante" file="db/changelog/categorias-restaurante.csv">
+    <column name="nome" type="STRING"/>
+</loadData>
+```
+
+Três decisões:
+
+- **Sem a coluna `id`.** Ela é `SERIAL`. Listar ids no CSV deixaria a sequence defasada — o mesmo
+  problema que o `setval` resolveu no seed da versão Spring.
+- **`<column type>` declarado.** Sem ele o Liquibase adivinha pelo conteúdo, e um CSV de códigos
+  numéricos vira coluna numérica.
+- **`<rollback>` explícito**, com `<delete>`. `loadData` não tem rollback automático.
+
+**Seed grande → `<sqlFile>`.** A regra que separa os dois não é o tamanho, é a **forma**: `loadData`
+carrega linhas independentes com valores literais; o seed de demonstração resolve FKs por subquery
+sobre o nome, insere ids explícitos e chama `setval` — ele descreve um **procedimento**, não uma
+tabela de valores.
+
+**A view → `<sql>` com `runOnChange="true"`.** Existe um `<createView>` declarativo, e ele não foi
+usado de propósito: ele aceita o `SELECT` em texto de qualquer jeito — ou seja, o corpo da view nunca
+é portável de verdade — e ainda adiciona uma camada entre o que você escreve e o que roda.
+
+---
+
+## Qual escolher, para o JFood
+
+**Fica o Flyway**, na versão Spring — e a razão não é técnica, é de contexto.
+
+O JFood roda em **um** PostgreSQL e vai continuar rodando. Não há segundo banco alvo, e portanto a
+portabilidade do XML declarativo — o principal argumento do Liquibase — não compra nada. Em troca,
+custa um formato a mais para o time aprender e uma camada entre a intenção e o SQL executado.
+
+**O que o Liquibase entregaria de verdade aqui**, e vale reconhecer:
+
+- **Rollback versionado no open source.** O Flyway só tem `undo` na versão paga. Se o time precisa
+  de rollback como procedimento de plantão documentado, isso sozinho decide.
+- **`labels`.** Subir homologação sem dados de demonstração é uma flag, e não um script à parte.
+- **A colisão de versões entre branches vira conflito de merge** no `changeLog.xml`, em vez do erro
+  de `V9` duplicada que a Etapa 4 Parte 1 reproduziu.
+
+**O que decidiria a favor dele:** o dia em que o JFood precisar rodar o mesmo esquema em outro banco
+— um cliente enterprise com Oracle, por exemplo. Aí o XML declarativo deixa de ser cerimônia e passa
+a ser a única forma de não manter dois conjuntos de migrações.
+
+> **As duas resolvem o mesmo problema com o mesmo modelo mental**: linha do tempo ordenada, tabela de
+> histórico, checksum, imutabilidade do que já rodou. Quem entendeu a Parte 1 já entendeu a maior
+> parte da Parte 2. Muda o vocabulário, e muda quanto trabalho você delega para a ferramenta.
